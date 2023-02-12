@@ -116,11 +116,11 @@
         private String username;
         private String password;
         private String email;
-        private String rule;
+        private String role;
     
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return Collections.singleton(new SimpleGrantedAuthority(rule));
+            return Collections.singleton(new SimpleGrantedAuthority(role));
         }
     
         @Override
