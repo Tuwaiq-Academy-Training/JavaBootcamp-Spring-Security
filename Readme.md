@@ -150,7 +150,23 @@
 
 
 
-   @Bean
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+
+    private final MyUserDetailsService myUserDetailsService;
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(myUserDetailsService);
+        authenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
             http.csrf().disable()
                     .sessionManagement()
@@ -166,11 +182,9 @@
                     .deleteCookies("JSESSIONID")
                     .invalidateHttpSession(true)
                     .and()
-                    .httpBasic();
+                .httpBasic();
         return http.build();
     }
-    
-    
 
 
-
+}
