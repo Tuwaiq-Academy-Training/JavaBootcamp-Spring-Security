@@ -67,21 +67,16 @@
 
 5- اضافة EnableWebSecurity@ وهو التعليق التوضيحي الذي يؤدي  إلى تطبيق تكوين الأمان الافتراضي لـ Spring
 
-6- جعل SecurityConfig يشتق من WebSecurityConfigurerAdapter 
-
-7- إعادة تعريف دالة configure(AuthenticationManagerBuilder auth) 
+6- إعادة تعريف دالة authenticationProvider 
 
 
-    @Configuration
-    @EnableWebSecurity
-    @RequiredArgsConstructor
-    public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    
-        private final MyUserDetailsService myUserDetailsService;
-        @Override
-        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-                auth.userDetailsService(myUserDetailsService).passwordEncoder(NoOpPassword   Encoder.getInstance());
-        }
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(myUserDetailsService);
+        authenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder());
+        return authenticationProvider;
+    }
 
 
 8- انشاء MyUserDetailsService الذي يقوم بتنفيذ واجهة UserDetailsService 
@@ -150,30 +145,26 @@
     }
 
 
-11- إعادة تعريف دالة configure(HttpSecurity http) 
+11- إعادة تعريف دالة securityFilterChain(HttpSecurity http) 
 
 
-
-    @Configuration
-    @EnableWebSecurity
-    @RequiredArgsConstructor
-    public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    
-        private final MyUserDetailsService myUserDetailsService;
-        @Override
-        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-                auth.userDetailsService(myUserDetailsService).passwordEncoder(NoOpPassword   Encoder.getInstance());
-        }
-    
-      @Override
-        protected void configure(HttpSecurity http) throws Exception {
+   @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
             http.csrf().disable()
-                    .authorizeRequests()
-                    .antMatchers("/api/v1/auth/guest").permitAll()
-                    .antMatchers("/api/v1/auth/admin").hasAuthority("ADMIN")
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                    .and()
+                    .authenticationProvider(authenticationProvider())
+                    .authorizeHttpRequests()
+                     .requestMatchers(HttpMethod.POST,"/api/v1/auth/register").permitAll()
+                    .requestMatchers("/api/v1/auth/admin").hasAuthority("ADMIN")
                     .anyRequest().authenticated()
                     .and()
-                    .httpBasic();
-        }
+                    .logout().logoutUrl("/api/v1/auth/logout")
+                    .deleteCookies("JSESSIONID")
+                    .invalidateHttpSession(true)
+                    .and()
+                .httpBasic();
+        return http.build();
     }
 
