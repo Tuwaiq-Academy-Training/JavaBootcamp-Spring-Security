@@ -79,9 +79,9 @@
     }
 
 
-8- انشاء MyUserDetailsService الذي يقوم بتنفيذ واجهة UserDetailsService 
+7- انشاء MyUserDetailsService الذي يقوم بتنفيذ واجهة UserDetailsService 
 
-9- تعريف دالة loadUserByUsername
+8- تعريف دالة loadUserByUsername
 
 
 
@@ -104,7 +104,7 @@
     }
 
 
-10- جعل User تنفذ واجهة UserDetails وتعريف جميع الدوال الخاصة بالواجهة
+9- جعل User تنفذ واجهة UserDetails وتعريف جميع الدوال الخاصة بالواجهة
 
 
     @Entity
@@ -145,7 +145,8 @@
     }
 
 
-11- إعادة تعريف دالة securityFilterChain(HttpSecurity http) 
+10- إعادة تعريف دالة securityFilterChain(HttpSecurity http) 
+
 
 
    @Bean
@@ -164,7 +165,7 @@
                     .deleteCookies("JSESSIONID")
                     .invalidateHttpSession(true)
                     .and()
-                .httpBasic();
+                    .httpBasic();
         return http.build();
     }
 
